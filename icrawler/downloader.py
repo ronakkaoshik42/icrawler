@@ -6,7 +6,7 @@ from PIL import Image
 from six import BytesIO
 from six.moves import queue
 from six.moves.urllib.parse import urlparse
-
+import urllib
 from icrawler.utils import ThreadPool
 
 
@@ -96,8 +96,8 @@ class Downloader(ThreadPool):
     def download(self,
                  task,
                  default_ext,
-                 timeout=5,
-                 max_retry=3,
+                 timeout=2,
+                 max_retry=1,
                  overwrite=False,
                  **kwargs):
         """Download the image and save it to the corresponding path.
@@ -112,7 +112,9 @@ class Downloader(ThreadPool):
         task['success'] = False
         task['filename'] = None
         retry = max_retry
-
+        opener=urllib.request.build_opener()
+        opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+        urllib.request.install_opener(opener)
         if not overwrite:
             with self.lock:
                 self.fetched_num += 1
@@ -124,7 +126,9 @@ class Downloader(ThreadPool):
 
         while retry > 0 and not self.signal.get('reach_max_num'):
             try:
-                response = self.session.get(file_url, timeout=timeout)
+                # response = self.session.get(file_url, timeout=timeout)
+                # urllib.request.urlretrieve(file_url,filename)
+                response = urllib.request.urlopen(file_url)
             except Exception as e:
                 self.logger.error('Exception caught when downloading file %s, '
                                   'error: %s, remaining retry times: %d',
@@ -133,17 +137,17 @@ class Downloader(ThreadPool):
                 if self.reach_max_num():
                     self.signal.set(reach_max_num=True)
                     break
-                elif response.status_code != 200:
-                    self.logger.error('Response status code %d, file %s',
-                                      response.status_code, file_url)
-                    break
-                elif not self.keep_file(task, response, **kwargs):
-                    break
+                # elif response.status_code != 200:
+                #     self.logger.error('Response status code %d, file %s',
+                #                       response.status_code, file_url)
+                #     break
+                # elif not self.keep_file(task, response, **kwargs):
+                #     break
                 with self.lock:
                     self.fetched_num += 1
                     filename = self.get_filename(task, default_ext)
                 self.logger.info('image #%s\t%s', self.fetched_num, file_url)
-                self.storage.write(filename, response.content)
+                self.storage.write(filename, response.read())
                 task['success'] = True
                 task['filename'] = filename
                 break
