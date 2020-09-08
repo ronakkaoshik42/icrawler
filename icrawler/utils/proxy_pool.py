@@ -246,8 +246,8 @@ class ProxyPool(object):
     def validate(self,
                  proxy_scanner,
                  expected_num=20,
-                 queue_timeout=3,
-                 val_timeout=5):
+                 queue_timeout=0.5,
+                 val_timeout=0.5):
         """Target function of validation threads
 
         Args:
@@ -283,8 +283,8 @@ class ProxyPool(object):
              proxy_scanner,
              expected_num=20,
              val_thr_num=4,
-             queue_timeout=3,
-             val_timeout=5,
+             queue_timeout=0.5,
+             val_timeout=0.5,
              out_file='proxies.json'):
         """Scan and validate proxies
 
@@ -330,8 +330,8 @@ class ProxyPool(object):
                      region='mainland',
                      expected_num=20,
                      val_thr_num=4,
-                     queue_timeout=3,
-                     val_timeout=5,
+                     queue_timeout=0.5,
+                     val_timeout=0.5,
                      out_file='proxies.json',
                      src_files=None):
         """Default scan method, to simplify the usage of `scan` method.
