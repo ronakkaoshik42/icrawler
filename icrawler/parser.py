@@ -44,9 +44,9 @@ class Parser(ThreadPool):
         raise NotImplementedError
 
     def worker_exec(self,
-                    queue_timeout=2,
-                    req_timeout=5,
-                    max_retry=3,
+                    queue_timeout=0.5,
+                    req_timeout=0.5,
+                    max_retry=1,
                     **kwargs):
         """Target method of workers.
 
@@ -105,12 +105,12 @@ class Parser(ThreadPool):
                         while not self.signal.get('reach_max_num'):
                             try:
                                 if isinstance(task, dict):
-                                    self.output(task, timeout=1)
+                                    self.output(task, timeout=0.5)
                                 elif isinstance(task, str):
                                     # this case only work for GreedyCrawler,
                                     # which need to feed the url back to
                                     # url_queue, dirty implementation
-                                    self.input(task, timeout=1)
+                                    self.input(task, timeout=0.5)
                             except queue.Full:
                                 time.sleep(1)
                             except Exception as e:
